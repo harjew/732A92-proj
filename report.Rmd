@@ -1,5 +1,5 @@
 ---
-title: "Classification of song genre using the lyrics"
+title: "Classification of song genre by lyrics"
 subtitle: ""
 date: '`r Sys.Date()`'
 author: 'Härje Widing (harwi732)'
@@ -26,20 +26,23 @@ knitr::opts_chunk$set(echo = F, warning = F, message = F)
 
 # Abstract
 
-This paper will focus on the hypothesis that models that has "memory" and takes 
-the ordering of the words in consideration when classifying which music genre 
-only using the lyrics, hence, the ordering of the words gives additional information
-to the predictions. This was made possible by using the 
-dataset “Spotify music genre list and 80k songs/tracks” @kaggle I was able to
-receive music genre from each song, but unfortunately not the lyrics. Using the
-combinations between Spotify API and Genius lyrics API there was possible to retrieve the
+This paper will focus on the hypothesis that models with "memory", 
+i.e. take into account the word order, are preferred when predicting 
+the song genre where you only use the lyrics. Hence, the ordering of
+the words provides additional information to the predictions. This 
+was made possible by using the dataset “Spotify music genre list and 
+80k songs/tracks” @kaggle I was able to receive music genre from each
+song, but unfortunately not the lyrics. Using the combinations between 
+Spotify API and Genius lyrics API there was possible to retrieve the 
 correct lyric to the matching song. The paper will compare three models, 
-Gated Recurrent Unit (GRU), Long Short-Term Memory (LSTM) as models with memory 
-and the Multinomial Naive Bayes classifier (MNB) as model without memory. The results
-shown that both the GRU and LSTM both preformed as well as the MNB. Given the data 
-material and the selected models for the study, we can assume that when it comes 
-to predicting which music genre, the order of the words may not have a major impact, 
-but which words used have the greatest impact on the predictions.
+Gated Recurrent Unit (GRU), Long Short-Term Memory (LSTM) as models with 
+memory and the Multinomial Naive Bayes classifier (MNB) as model without 
+memory. The results shown that both the GRU and LSTM both accuracy is close
+to $0.36$ and the MNB had a accuracy close to $0.37$. Given the data 
+material and the selected models for the study, we can assume that 
+when it comes to predicting which music genre, the ordering of the 
+words may not have a major impact, but which words used have the greatest 
+impact on the predictions.
 
 
 
@@ -70,12 +73,15 @@ available at the moment of the paper was written. So, I had to create it myself,
 with Spotify API and Genius lyrics API I manage to retrieve the dataset that was
 needed to finish the study. Since the dataset consisted of 120 different 
 genre from the clean dataset with the smallest group of two songs in it
-I needed to reduce the number of genres. By selected the 20 largest genre groups from 
+I needed to reduce the number of genres. By selecting the 20 largest genre groups from 
 the English lyrics, which resulted in over 400 different songs in each genre group.
 
-In the end the paper concludes that given the data and models used, that 
-models that consider the ordering of the words does not have a significant 
-impact on the accuracy of the model.
+
+The results show that the "memory netowks models" did not preformed as well 
+as the Naive Bayes classifier when predicting the genre only using the lyrics. 
+And concludes that given the data and models used, that models that 
+consider the ordering of the words does not have a significant impact on 
+the accuracy of the model. 
 
 
 \newpage
@@ -83,8 +89,8 @@ impact on the accuracy of the model.
 # Lyrics
 
 There was no available dataset that fitted the idea to classify the song genre 
-using the lyrics. To be able to solve the problem I first downloaded the dataset 
-“Spotify music genre list and 80k songs/tracks” @kaggle referred as songDB,
+using the lyrics. To be able to solve the problem, first downloaded the dataset 
+“Spotify music genre list and 80k songs/tracks” from @kaggle referred as songDB,
 I was able to get 
 the genre from each song but not the lyrics from all over the world. This was 
 solved by using both the Spotify API, @spotify, to acquire the song name 
@@ -256,13 +262,13 @@ where K is the number of classes in the multiclass. @softmax
 
 #### Exploding/Vanishing Gradient and Gradient Clipping
 
-As discussed, the RNN may have problems capture ling term dependencies 
+As discussed, the RNN may have problems capture long term dependencies 
 of multiple layers because of the multiplicative gradient that can be decreasing 
 or increasing exponentially. Therefore, it's common to have vanishing and exploding
 gradient to discard the exponentially changing gradient problem. 
 
 The technique used to cope with the exploding gradient is called Gradient Clipping. 
-The technique is to chopping the maximum value of the gradient, as shown in Figure 5.
+The technique is to chopping the maximum value of the gradient, as shown in Figure 5. @stanford
 
 ```{r,eval=F}
 library(latex2exp)
@@ -300,7 +306,7 @@ out of a sigmoid neural net. Using the characteristics of the sigmoid function,
 the output from each sigmoid layer illustrates how much each component should be
 let through. @lstmb
 
-The gates are used to manage the gradient problem, specific gates are used in 
+The gates are used to manage the gradient problem, and specific gates are used in 
 some types of RNN, and equal to, 
 
 $$\Gamma = \sigma(Wx^t+Ua^{t-1}+b) $$
@@ -346,14 +352,15 @@ characterization functions.
 
 ### Gated Recurrent Unit
 
-Gated Recurrent Unit (GRU), can be considered as variation on the LSTM because of their design
-and in some cases, produces similar results. GTU tries to reduce the vanishing gradient problem which 
-consists in standard RNN, it can also be seen as a improved version of the RNN. It uses so called
-*update gate and reset gate*, as mentioned in LSTM the gates controls the information that is 
-passed through the cells. @gru
+Gated Recurrent Unit (GRU), can be considered as variation on the LSTM because of 
+their design and in some cases, produces similar results. GTU tries to reduce the 
+vanishing gradient problem which consists in standard RNN, one can also see it as 
+as an improved version of the RNN. The network uses so called 
+*update gate and reset gate*, as mentioned in LSTM the gates controls the 
+information that is passed through the cells. @gru
 
-The GRU has two different types of gates, the two first mentioned gates in Table 1, Update gate $\Gamma_u$ and 
-Relevance gate $\Gamma_r$, with the characterization functions defined as:
+The GRU has two different types of gates, the two first mentioned gates in Table 1, 
+Update gate $\Gamma_u$ and Relevance gate $\Gamma_r$, with the characterization functions defined as:
 
 
 $$c'^t = tanh[W_c(\Gamma_r \times a^{t-1},x^t) + b_c] $$
@@ -375,11 +382,10 @@ $$a^t= c^t $$
 ### Dropout
 
 Dropout is a technique that is designed for reducing overfitting in feedforward 
-neural networks. The idea is that during training interactions each neuron is omitted 
-from the network with the probability $p$. When the training is completed all 
-neurons are returned and the network predicts using all neurons. Where the basic idea 
-of the behavior of the dropout can be expressed as the activation function composed with
-the dropout,
+neural networks. The idea is that during the training interactions, each neuron 
+with the probability $p$. When the training is completed, all neurons are returned 
+and the network predicts using all neurons. Where the basic idea of the behavior 
+of the dropout can be expressed as the activation function composed with the dropout,
 
 
 $$y = f(Wx)\circ m$$
@@ -484,8 +490,8 @@ take in consideration of stop words in the MNB.
 
 ## Training /validation and test
 
-In this paper I used a training validation and test data strategy to compare 
-the two models between them. Since the LSTM preforms better with a larger 
+In this paper used a training validation and test data strategy to compare 
+the three models between them. Since the LSTM preforms better with a larger 
 training data set I used the following split of the total dataset shown in 
 Table 2.
 
@@ -506,6 +512,18 @@ Table 2.
 
 \end{center}
 \end{table}
+
+The results will compare the models with Accuracy, Precision, Recall and $f1-score$ 
+to compare the models tested, these are calculated in the following way, 
+
+$$Accuracy=\frac{TP+TN}{TP+TN+FN+FP}$$
+
+$$Precision = \frac{TP}{TP+FP} $$
+
+$$Recall = \frac{TP}{TP+FN} $$
+
+$$f1-score = 2\times\frac{Recall\times Precision}{Recall+Precision} $$
+@koo
 
 
 ## Overfitting problems
